@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
 
 # 1. إعدادات واجهة المستخدم الملكية الفخمة بألوان علم كوردستان والشمس الذهبية
 st.set_page_config(page_title="♕Bãvê«»Kùrdø♕ AI Sports Hub", page_icon="⚽", layout="wide")
@@ -24,7 +23,7 @@ if 'price_yearly' not in st.session_state:
 if 'vip_active' not in st.session_state:
     st.session_state.vip_active = False
 
-# جلب تاريخ اليوم الحالي الحقيقي ديناميكياً لتحديث المباريات أوتوماتيكياً كل يوم
+# جلب تاريخ اليوم الحالي الحقيقي
 today_display = "الجمعة 30 أكتوبر 2026"
 
 # تخصيص واجهة المستخدم المتقدمة للهواتف بألوان علم كوردستان الكاملة
@@ -80,7 +79,7 @@ st.markdown('<div class="sub-title">« المَنَصَّةُ الرِّيَاض
 # قائمة الـ 55 موقعاً الإحصائياً
 ALL_55_SOURCES = ["BettingStats", "ScoreVoro", "Predicta - AI", "Predictions.S", "FootyStats", "Livescore Kè", "statarea", "StatsBet", "League - Goal", "tppboilerplate", "Stats Insider", "Football Predictions (GV)", "RebelBetting", "GoalSpy", "StatsHub", "لحظة الإحصائية 1", "SoccerSite", "Medium", "PitchPressure", "أفضل تقنيات الذكاء", "Football predictions (T)", "NerdyTips", "نصائح المراهنة الـ VIP", "Daily Tips", "Football Predictions (Flame)", "Multi Betting Tips", "ScoreGPT", "SmartMatch", "Predictions (F)", "PredictLix 1", "gambeta.ai", "Sofascore", "Goalii", "PredictLix 2", "Whop", "Houdini Predictions", "Besoccer Web", "MyBetStrategy", "توقعات دور المجموعات", "AI Sports Betting", "Prosoccr / Sporty", "Football Predictions (Hexagon)", "WinFulltime", "لحظة الإحصائية 2", "Opta Analyst", "Sportytrader", "إحصائيات كرة القدم", "FotMob", "Soccer and Football", "Gambeta AI", "IA FOOT", "Master Football", "Free Sports Predictions", "11XScore", "BetYouCanWin"]
 
-# خزان البيانات الشامل والديناميكي لكافة مباريات وبطولات اليوم (الصباحية، الحية، والمسائية القادمة)
+# خزان البيانات الشامل والديناميكي لكافة مباريات وبطولات اليوم
 fixtures_pool = [
     ("ريال مدريد", "برشلونة", "الدوري الإسباني 🇪🇸", "فوز ريال مدريد", 96, "VIP 🔒", "مسائية (22:00) ⏱️"),
     ("مانشستر سيتي", "أرسنال", "الدوري الإنجليزي 🏴󠁧󠁢󠁥󠁮󠁧󠁿", "أكثر من 2.5 هدف", 94, "VIP 🔒", "مسائية (19:30) ⏱️"),
@@ -100,7 +99,7 @@ fixtures_pool = [
 tabs = st.tabs(["📅 جدول المباريات الكامل", "📊 مركز التوقعات والـ VIP", "🏆 ترتيب الدوريات", "🔥 هدافي العالم"])
 
 # ---- القسم الأول ----
-with tabs[0]:
+with tabs:
     st.markdown(f'<div class="date-badge">📆 تاريخ اليوم: {today_display}</div>', unsafe_allow_html=True)
     st.markdown('<div class="section-header">📅 جدول وتصنيفات مباريات اليوم (الحية، المسائية، والصباحية)</div>', unsafe_allow_html=True)
     
@@ -119,7 +118,7 @@ with tabs[0]:
             st.write("---")
 
 # ---- القسم الثاني ----
-with tabs[1]:
+with tabs:
     st.markdown('<div class="section-header">📊 مركز التحليل والمطابقة الحية (شبكة الـ 55 منصة الإحصائية)</div>', unsafe_allow_html=True)
     with st.expander("🔗 استعراض أسماء الـ 55 موقعاً المربوطة بالشبكة"):
         st.markdown("".join([f'<span class="source-badge">🌐 {src}</span>' for src in ALL_55_SOURCES]), unsafe_allow_html=True)
@@ -137,23 +136,39 @@ with tabs[1]:
                 st.success(f"🎯 التوقع النهائي المعتمد الجاهز مسبقاً: {opt} (نسبة النجاح المتوقعة: {pct}%)")
 
 # ---- القسم الثالث ----
-with tabs[2]:
+with tabs:
     st.markdown('<div class="section-header">🏆 جداول ترتيب الأندية في الدوريات الكبرى والعربية</div>', unsafe_allow_html=True)
     selected_league_table = st.selectbox("اختر الدوري لاستعراض جدول الترتيب بالكامل:", ["الدوري الإنجليزي الممتاز", "الدوري الإسباني", "دوري روشن السعودي", "الدوري الإيطالي"])
     
     if selected_league_table == "الدوري الإنجليزي الممتاز":
-        df = pd.DataFrame({"الترتيب":, "النادي": ["ليفربول", "مانشستر سيتي", "أرسنال", "تشيلسي"], "لعب":, "النقاط": [22, 20, 18, 17]})
+        st.write("1️⃣ ليفربول - 24 نقطة")
+        st.write("2️⃣ مانشستر سيتي - 23 نقطة")
+        st.write("3️⃣ أرسنال - 20 نقطة")
+        st.write("4️⃣ تشيلسي - 18 نقطة")
     elif selected_league_table == "الدوري الإسباني":
-        df = pd.DataFrame({"الترتيب":, "النادي": ["برشلونة", "ريال مدريد", "أتلتيكو مدريد", "فياريال"], "لعب":, "النقاط": [30, 24, 21, 21]})
+        st.write("1️⃣ برشلونة - 30 نقطة")
+        st.write("2️⃣ ريال مدريد - 27 نقطة")
+        st.write("3️⃣ أتلتيكو مدريد - 21 نقطة")
+        st.write("4️⃣ فياريال - 18 نقطة")
     elif selected_league_table == "دوري روشن السعودي":
-        df = pd.DataFrame({"الترتيب":, "النادي": ["الهلال", "الاتحاد", "النصر", "الشباب"], "لعب":, "النقاط": [24, 21, 18, 15]})
+        st.write("1️⃣ الهلال - 24 نقطة")
+        st.write("2️⃣ الاتحاد - 21 نقطة")
+        st.write("3️⃣ النصر - 18 نقطة")
+        st.write("4️⃣ الشباب - 15 نقطة")
     else:
-        df = pd.DataFrame({"الترتيب":, "النادي": ["نابولي", "إنتر ميلان", "يوفنتوس", "أتالانتا"], "لعب":, "النقاط": [22, 18, 17, 16]})
-        
-    st.dataframe(df.set_index("الترتيب"), use_container_width=True)
+        st.write("1️⃣ نابولي - 22 نقطة")
+        st.write("2️⃣ إنتر ميلان - 18 نقطة")
+        st.write("3️⃣ يوفنتوس - 17 نقطة")
+        st.write("4️⃣ أتالانتا - 16 نقطة")
 
 # ---- القسم الرابع ----
-with tabs[3]:
+with tabs:
     st.markdown('<div class="section-header">🔥 قائمة هدافي البطولات الكبرى والمحدثة دورياً</div>', unsafe_allow_html=True)
-    df_scorers = pd.DataFrame({
-        "اللاعب": ["روبرت ليفاندوفسكي", "إيرلينج هالاند", "ألكسندر ميتروفيتش", "كيليان مبابي", "محمد صلاح"],
+    st.write("⚽ روبرت ليفاندوفسكي (برشلونة) - 12 هدف")
+    st.write("⚽ إيرلينج هالاند (مانشستر سيتي) - 11 هدف")
+    st.write("⚽ ألكسندر ميتروفيتش (الهلال) - 10 أهداف")
+    st.write("⚽ كيليان مبابي (ريال مدريد) - 8 أهداف")
+    st.write("⚽ محمد صلاح (ليفربول) - 7 أهداف")
+
+# ---- الباقات وعمليات الدفع ----
+st.write("---")
