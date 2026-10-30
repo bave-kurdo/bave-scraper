@@ -14,6 +14,10 @@ if 'binance_usdt_address' not in st.session_state:
 if 'binance_network' not in st.session_state:
     st.session_state.binance_network = "Binance Smart Chain (BSC - BEP20)"
 
+# نظام التفعيل العام للمسؤول (غرفة المسؤول)
+if 'global_vip_unlocked' not in st.session_state:
+    st.session_state.global_vip_unlocked = False
+
 # الأسعار الحالية المعتمدة لباقات الـ VIP
 if 'price_weekly' not in st.session_state:
     st.session_state.price_weekly = "5$"
@@ -80,7 +84,7 @@ st.markdown("""
 st.markdown('<div class="kurdistan-flag"><div class="flag-red"></div><div class="flag-white"></div><div class="flag-green"></div></div>', unsafe_allow_html=True)
 st.markdown('<div class="sun-icon">☀️</div>', unsafe_allow_html=True)
 st.markdown('<div class="main-title">👑 Bãvê«»Kùrdø 👑<br>مركز رياضي للذكاء الاصطناعي ومكشطة ديناميكية</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">« المَنَصَّةُ الرِّيَاضِيَّةُ الشَّامِلَةُ لِجَمِيعِ الدَّورِيَاتِ بِإِشْرَافِ المَطُوِّرِ ♕Bãvê«»Kùrdø♕ »</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">« المَنَصَّةُ الرِّيَاضِيَّةُ الشَّامِلَةُ لِجَمِيعِ الدَّورِيَاتِ بِإِشْرَافِ actor المَطُوِّرِ ♕Bãvê«»Kùrdø♕ »</div>', unsafe_allow_html=True)
 
 # قائمة الـ 55 موقعاً الإحصائياً
 ALL_55_SOURCES = ["BettingStats", "ScoreVoro", "Predicta - AI", "Predictions.S", "FootyStats", "Livescore Kè", "statarea", "StatsBet", "League - Goal", "tppboilerplate", "Stats Insider", "Football Predictions (GV)", "RebelBetting", "GoalSpy", "StatsHub", "لحظة الإحصائية 1", "SoccerSite", "Medium", "PitchPressure", "أفضل تقنيات الذكاء", "Football predictions (T)", "NerdyTips", "نصائح المراهنة الـ VIP", "Daily Tips", "Football Predictions (Flame)", "Multi Betting Tips", "ScoreGPT", "SmartMatch", "Predictions (F)", "PredictLix 1", "gambeta.ai", "Sofascore", "Goalii", "PredictLix 2", "Whop", "Houdini Predictions", "Besoccer Web", "MyBetStrategy", "توقعات دور المجموعات", "AI Sports Betting", "Prosoccr / Sporty", "Football Predictions (Hexagon)", "WinFulltime", "لحظة الإحصائية 2", "Opta Analyst", "Sportytrader", "إحصائيات كرة القدم", "FotMob", "Soccer and Football", "Gambeta AI", "IA FOOT", "Master Football", "Free Sports Predictions", "11XScore", "BetYouCanWin"]
@@ -106,14 +110,14 @@ def fetch_all_global_leagues_data():
             res = requests.get(url, timeout=4).json()
             
             if res and isinstance(res, list):
-                for match in res[:3]:  # جلب عينة من المباريات لكل دوري
+                for match in res[:3]:
                     t1 = match.get("team1", {}).get("teamName", "فريق 1")
                     t2 = match.get("team2", {}).get("teamName", "فريق 2")
                     
                     h_val = hash(t1) + current_date_raw.day
                     calc_percent = (h_val % 15) + 82
                     
-                    options = ["فوز صاحب الأرض (1)", "أكثر من 2.5 هدف", "كla الفريقين يسجلان (GG)", "فوز الضيف أو تعادل (X2)"]
+                    options = ["فوز صاحب الأرض (1)", "أكثر من 2.5 هدف", "كلا الفريقين يسجلان (GG)", "فوز الضيف أو تعادل (X2)"]
                     selected_option = options[h_val % len(options)]
                     
                     matches_list.append({
@@ -128,7 +132,6 @@ def fetch_all_global_leagues_data():
         except:
             continue
             
-    # بيانات احتياطية لضمان العرض الفوري لجميع الدوريات الظاهرة في صورك
     if not matches_list:
         backup_leagues = [
             ("تروا", "لومان", "بطولة فرنسا. الدوري الأول 🇫🇷", "فوز تروا أو تعادل (1X)", 88, "مجاني ✅", "مجدولة (10:45 م) ⏱️"),
@@ -147,7 +150,7 @@ def fetch_all_global_leagues_data():
 
 all_data = fetch_all_global_leagues_data()
 
-# 🧭 إنشاء شريط التبويب الرئيسي بشكل صحيح ومحدد الفهارس
+# 🧭 إنشاء شريط التبويب الرئيسي
 tabs = st.tabs(["📅 جدول المباريات الكامل", "📊 مركز التوقعات والـ VIP", "🏆 ترتيب الدوريات", "🔥 هدافي العالم"])
 
 # ---- التبويب الأول: جدول المباريات الكامل ----
@@ -176,7 +179,7 @@ with tabs[1]:
     if 'vip_active' not in st.session_state:
         st.session_state.vip_active = False
 
-    if not st.session_state.vip_active:
-        st.warning("🔒 التوقعات عالية النسبة (VIP) مغلقة حالياً. يرجى تفعيل التنشيط لرؤية كامل التحليلات.")
-        
-        st.markdown("### 👑 تفعيل حساب VIP الملكي")
+    # التحقق مما إذا كان المسؤول قد فتح الـ VIP برمجياً للجميع أو قام المستخدم بتفعيله لنفسه
+    is_vip_accessible = st.session_state.vip_active or st.session_state.global_vip_unlocked
+
+    if not is_vip_accessible:
