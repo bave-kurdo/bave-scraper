@@ -80,8 +80,50 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# عرض علم كوردستان والشمس الذهبية في المقدمة
+# عرض علم كوردستان في المقدمة
 st.markdown('<div class="kurdistan-flag"><div class="flag-red"></div><div class="flag-white"></div><div class="flag-green"></div></div>', unsafe_allow_html=True)
+
+# =========================================================================
+# ⚙️ [الموقع الجديد] غرفة المسؤول في أعلى الصفحة تماماً (فوق السهم ومقدمة الموقع)
+# =========================================================================
+with st.sidebar:
+    st.markdown("### ⚙️ لوحة تحكم المسؤول السري")
+    admin_password = st.text_input("أدخل كلمة مرور الإدارة:", type="password", key="sidebar_admin_pass")
+    if admin_password == "admin123":
+        st.success("أهلاً بك يا أفندي ♕Bãvê«»Kùrdø♕")
+        if st.session_state.global_vip_unlocked:
+            if st.button("🔴 قفل التوقعات الـ VIP الآن"):
+                st.session_state.global_vip_unlocked = False
+                st.rerun()
+        else:
+            if st.button("🟢 فتح جميع التوقعات للجميع فوراً"):
+                st.session_state.global_vip_unlocked = True
+                st.rerun()
+                
+        st.markdown("---")
+        new_sham = st.text_input("تحديث كاش:", value=st.session_state.sham_cash_id)
+        new_usdt = st.text_input("تحديث USDT:", value=st.session_state.binance_usdt_address)
+        if st.button("حفظ التحديثات 💾"):
+            st.session_state.sham_cash_id = new_sham
+            st.session_state.binance_usdt_address = new_usdt
+            st.success("تم الحفظ!")
+
+# عرض لوحة التحكم الاختيارية المباشرة في واجهة الصفحة العلوية أيضاً لسهولة الوصول من الجوال
+with st.expander("🔑 تسجيل دخول المسؤول السريع (اضغط هنا لفتح وإغلاق التوقعات المقفولة)"):
+    top_admin_password = st.text_input("كلمة مرور المسؤول للتحكم السريع:", type="password", key="top_admin_pass")
+    if top_admin_password == "admin123":
+        col_lock, col_unlock = st.columns(2)
+        with col_lock:
+            if st.button("🔓 تفعيل وضع الفتح الكامل للزوار", key="top_unlock_btn"):
+                st.session_state.global_vip_unlocked = True
+                st.success("تم الفتح!")
+                st.rerun()
+        with col_unlock:
+            if st.button("🔒 إغلاق وعودة جدار الاشتراك", key="top_lock_btn"):
+                st.session_state.global_vip_unlocked = False
+                st.info("تم الإغلاق!")
+                st.rerun()
+
 st.markdown('<div class="sun-icon">☀️</div>', unsafe_allow_html=True)
 st.markdown('<div class="main-title">👑 Bãvê«»Kùrdø 👑<br>مركز رياضي للذكاء الاصطناعي ومكشطة ديناميكية</div>', unsafe_allow_html=True)
 st.markdown('<div class="sub-title">« المَنَصَّةُ الرِّيَاضِيَّةُ الشَّامِلَةُ لِجَمِيعِ الدَّورِيَاتِ بِإِشْرَافِ المَطُوِّرِ ♕Bãvê«»Kùrdø♕ »</div>', unsafe_allow_html=True)
@@ -95,8 +137,6 @@ def fetch_all_global_leagues_data():
     matches_list = []
     leagues_pool = [
         {"code": "bl1", "name": "الدوري الألماني 🇩🇪"},
-        {"code": "bl2", "name": "الدوري الألماني الدرجة الثانية 🇩🇪"},
-        {"code": "cl", "name": "دوري أبطال أوروبا 🏆"},
         {"code": "laliga", "name": "الدوري الإسباني 🇪🇸"},
         {"code": "ligue1", "name": "الدوري الفرنسي 🇫🇷"}
     ]
@@ -139,42 +179,3 @@ def fetch_all_global_leagues_data():
             matches_list.append({
                 "المباراة": f"{t1} 🆚 {t2}", "البطولة": lg, "الوضعية": status_time,
                 "الخيار": opt, "المطابقة": f"{pct-4} منصة من 55", "النسبة": pct, "الفئة": cat
-            })
-    return matches_list
-
-all_data = fetch_all_global_leagues_data()
-
-# 🧭 إنشاء شريط التبويب الرئيسي
-tabs = st.tabs(["📅 جدول المباريات الكامل", "📊 مركز التوقعات والـ VIP", "🏆 ترتيب الدوريات", "🔥 هدافي العالم"])
-
-# ---- التبويب الأول: جدول المباريات الكامل ----
-with tabs[0]:
-    st.markdown(f'<div class="date-badge">📆 تاريخ اليوم: {today_display}</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-header">📅 جدول وتصنيفات جميع البطولات العالمية (محدث يومياً)</div>', unsafe_allow_html=True)
-    
-    available_leagues = list(set([m["البطولة"] for m in all_data]))
-    selected_league_filter = st.selectbox("🗂️ اختر الدوري للعرض:", ["عرض جميع الدوريات"] + available_leagues, key="filter_tab0")
-    
-    filtered_schedule = all_data if selected_league_filter == "عرض جميع الدوريات" else [m for m in all_data if m["البطولة"] == selected_league_filter]
-        
-    for match in filtered_schedule:
-        st.markdown(f"**🏆 {match['البطولة']}**")
-        col1, col2 = st.columns(2)
-        col1.write(f"⚽ {match['المباراة']}")
-        col2.info(f"{match['الوضعية']}")
-        st.write("---")
-
-# ---- التبويب الثاني: مركز التوقعات والـ VIP ----
-with tabs[1]:
-    st.markdown('<div class="section-header">📊 مركز التحليل والمطابقة الذكي (شبكة الـ 55 منصة الإحصائية)</div>', unsafe_allow_html=True)
-    with st.expander("🔗 استعراض أسماء الـ 55 موقعاً المربوطة بالشبكة"):
-        st.markdown("".join([f'<span class="source-badge">🌐 {src}</span>' for src in ALL_55_SOURCES]), unsafe_allow_html=True)
-        
-    if 'vip_active' not in st.session_state:
-        st.session_state.vip_active = False
-
-    is_vip_accessible = st.session_state.vip_active or st.session_state.global_vip_unlocked
-
-    if not is_vip_accessible:
-        st.warning("🔒 التوقعات عالية النسبة (VIP) مغلقة حالياً. يرجى تفعيل التنشيط لرؤية كامل التحليلات.")
-        st.markdown("### 👑 تفعيل حساب VIP الملكي")
