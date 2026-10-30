@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import requests
 from datetime import datetime
 
 # 1. إعدادات واجهة المستخدم الملكية الفخمة بألوان علم كوردستان والشمس الذهبية
@@ -26,7 +25,6 @@ if 'vip_active' not in st.session_state:
     st.session_state.vip_active = False
 
 # جلب تاريخ اليوم الحالي الحقيقي ديناميكياً لتحديث المباريات أوتوماتيكياً كل يوم
-current_date_raw = datetime.now()
 today_display = "الجمعة 30 أكتوبر 2026"
 
 # تخصيص واجهة المستخدم المتقدمة للهواتف بألوان علم كوردستان الكاملة
@@ -102,7 +100,7 @@ fixtures_pool = [
 tabs = st.tabs(["📅 جدول المباريات الكامل", "📊 مركز التوقعات والـ VIP", "🏆 ترتيب الدوريات", "🔥 هدافي العالم"])
 
 # ---- القسم الأول ----
-with tabs:
+with tabs[0]:
     st.markdown(f'<div class="date-badge">📆 تاريخ اليوم: {today_display}</div>', unsafe_allow_html=True)
     st.markdown('<div class="section-header">📅 جدول وتصنيفات مباريات اليوم (الحية، المسائية، والصباحية)</div>', unsafe_allow_html=True)
     
@@ -117,47 +115,45 @@ with tabs:
             
         if show_match:
             st.markdown(f"**🏆 {lg}**")
-            col1, col2 = st.columns(2)
-            col1.write(f"⚽ {t1} 🆚 {t2}")
-            col2.info(f"{status_time}")
+            st.write(f"⚽ {t1} 🆚 {t2} | {status_time}")
             st.write("---")
 
 # ---- القسم الثاني ----
-with tabs:
+with tabs[1]:
     st.markdown('<div class="section-header">📊 مركز التحليل والمطابقة الحية (شبكة الـ 55 منصة الإحصائية)</div>', unsafe_allow_html=True)
     with st.expander("🔗 استعراض أسماء الـ 55 موقعاً المربوطة بالشبكة"):
         st.markdown("".join([f'<span class="source-badge">🌐 {src}</span>' for src in ALL_55_SOURCES]), unsafe_allow_html=True)
         
     for t1, t2, lg, opt, pct, cat, status_time in fixtures_pool:
-        status_text = "🟢 خارق وثقة عالية جداً" if pct >= 90 else "🔴 ثقة متوسطة"
-        alert = st.success if pct >= 90 else st.info
-        
-        with st.expander(f"⚽ {t1} 🆚 {t2} | التوقع جاهز قبل البدء ⏱️"):
-            st.write(f"**🏆 البطولة:** {lg}")
-            st.write(f"**⏰ الوضعية الحالية:** `{status_time}`")
-            st.write(f"**🔗 مؤشر تطابق الشبكة:** `{pct-4} منصة من 55`")
-            if cat == "VIP 🔒" and not st.session_state.vip_active:
+        if cat == "VIP 🔒" and not st.session_state.vip_active:
+            with st.expander(f"⚽ {t1} 🆚 {t2} | التوقع جاهز قبل البدء ⏱️"):
+                st.write(f"**🏆 البطولة:** {lg}")
+                st.write(f"**⏰ الوضعية الحالية:** `{status_time}`")
                 st.warning("🔒 التوقع مقفل بحظر الحماية لباقات الـ VIP. متوفر فقط للمشتركين.")
-            else:
-                alert(f"🎯 التوقع المعتمد النهائي الجاهز مسبقاً: {opt} (نسبة النجاح المتوقعة: {pct}%)")
+        else:
+            with st.expander(f"⚽ {t1} 🆚 {t2} | التوقع جاهز قبل البدء ⏱️"):
+                st.write(f"**🏆 البطولة:** {lg}")
+                st.write(f"**⏰ الوضعية الحالية:** `{status_time}`")
+                st.success(f"🎯 التوقع النهائي المعتمد الجاهز مسبقاً: {opt} (نسبة النجاح المتوقعة: {pct}%)")
 
 # ---- القسم الثالث ----
-with tabs:
+with tabs[2]:
     st.markdown('<div class="section-header">🏆 جداول ترتيب الأندية في الدوريات الكبرى والعربية</div>', unsafe_allow_html=True)
     selected_league_table = st.selectbox("اختر الدوري لاستعراض جدول الترتيب بالكامل:", ["الدوري الإنجليزي الممتاز", "الدوري الإسباني", "دوري روشن السعودي", "الدوري الإيطالي"])
     
     if selected_league_table == "الدوري الإنجليزي الممتاز":
         df = pd.DataFrame({"الترتيب":, "النادي": ["ليفربول", "مانشستر سيتي", "أرسنال", "تشيلسي"], "لعب":, "النقاط": [22, 20, 18, 17]})
     elif selected_league_table == "الدوري الإسباني":
-        df = pd.DataFrame({"الترتيب":, "النادي": ["برشلونة", "ريال مدريد", "أتلتيكو مدريد", "فياريال"], "لعب":, "النقاط": [30, 24, 20, 18]})
+        df = pd.DataFrame({"الترتيب":, "النادي": ["برشلونة", "ريال مدريد", "أتلتيكو مدريد", "فياريال"], "لعب":, "النقاط": [30, 24, 21, 21]})
     elif selected_league_table == "دوري روشن السعودي":
         df = pd.DataFrame({"الترتيب":, "النادي": ["الهلال", "الاتحاد", "النصر", "الشباب"], "لعب":, "النقاط": [24, 21, 18, 15]})
     else:
-        df = pd.DataFrame({"الترتيب":, "النادي": ["نابولي", "إنتر ميلان", "يوفنتوس", "أتالانتا"], "لعب":, "النقاط": [25, 21, 18, 16]})
+        df = pd.DataFrame({"الترتيب":, "النادي": ["نابولي", "إنتر ميلان", "يوفنتوس", "أتالانتا"], "لعب":, "النقاط": [22, 18, 17, 16]})
         
     st.dataframe(df.set_index("الترتيب"), use_container_width=True)
 
 # ---- القسم الرابع ----
-with tabs:
+with tabs[3]:
     st.markdown('<div class="section-header">🔥 قائمة هدافي البطولات الكبرى والمحدثة دورياً</div>', unsafe_allow_html=True)
     df_scorers = pd.DataFrame({
+        "اللاعب": ["روبرت ليفاندوفسكي", "إيرلينج هالاند", "ألكسندر ميتروفيتش", "كيليان مبابي", "محمد صلاح"],
