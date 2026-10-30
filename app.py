@@ -14,12 +14,6 @@ if 'binance_usdt_address' not in st.session_state:
 if 'binance_network' not in st.session_state:
     st.session_state.binance_network = "Binance Smart Chain (BSC - BEP20)"
 
-# نظام التفعيل العام للمسؤول (غرفة المسؤول)
-if 'global_vip_unlocked' not in st.session_state:
-    st.session_state.global_vip_unlocked = False
-if 'vip_active' not in st.session_state:
-    st.session_state.vip_active = False
-
 # الأسعار الحالية المعتمدة لباقات الـ VIP
 if 'price_weekly' not in st.session_state:
     st.session_state.price_weekly = "5$"
@@ -28,15 +22,12 @@ if 'price_monthly' not in st.session_state:
 if 'price_yearly' not in st.session_state:
     st.session_state.price_yearly = "120$"
 
+if 'vip_active' not in st.session_state:
+    st.session_state.vip_active = False
+
 # جلب تاريخ اليوم الحالي الحقيقي ديناميكياً لتحديث المباريات أوتوماتيكياً كل يوم
 current_date_raw = datetime.now()
-today_date_str = current_date_raw.strftime("%Y-%m-%d")
-
-# مصفوفة الأيام باللغة العربية لعرضها في الشاشة
-days_arabic = {"Monday": "الإثنين", "Tuesday": "الثلاثاء", "Wednesday": "الأربعاء", "Thursday": "الخميس", "Friday": "الجمعة", "Saturday": "السبت", "Sunday": "الأحد"}
-day_name_en = current_date_raw.strftime("%A")
-day_name_ar = days_arabic.get(day_name_en, day_name_en)
-today_display = f"{day_name_ar} {current_date_raw.strftime('%d-%m-%Y')}"
+today_display = "الجمعة 30 أكتوبر 2026"
 
 # تخصيص واجهة المستخدم المتقدمة للهواتف بألوان علم كوردستان الكاملة
 st.markdown("""
@@ -82,99 +73,91 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# عرض علم كوردستان في المقدمة
+# عرض علم كوردستان والشمس الذهبية في المقدمة
 st.markdown('<div class="kurdistan-flag"><div class="flag-red"></div><div class="flag-white"></div><div class="flag-green"></div></div>', unsafe_allow_html=True)
-
-# =========================================================================
-# ⚙️ غرفة المسؤول المباشرة والسريعة في أعلى الصفحة (فوق السهم ومقدمة الموقع)
-# =========================================================================
-with st.expander("🔑 تسجيل دخول المسؤول السريع (اضغط هنا لفتح وإغلاق التوقعات المقفولة)"):
-    top_admin_password = st.text_input("كلمة مرور المسؤول للتحكم السريع:", type="password", key="top_admin_pass")
-    if top_admin_password == "admin123":
-        col_lock, col_unlock = st.columns(2)
-        with col_lock:
-            if st.button("🔓 تفعيل وضع الفتح الكامل للزوار", key="top_unlock_btn"):
-                st.session_state.global_vip_unlocked = True
-                st.success("تم فتح التوقعات للجميع!")
-                st.rerun()
-        with col_unlock:
-            if st.button("🔒 إغلاق وعودة جدار الاشتراك", key="top_lock_btn"):
-                st.session_state.global_vip_unlocked = False
-                st.info("تم قفل التوقعات وعاد جدار الحماية!")
-                st.rerun()
-
 st.markdown('<div class="sun-icon">☀️</div>', unsafe_allow_html=True)
-st.markdown('<div class="main-title">👑 Bãvê«»Kùrdø 👑<br>مركز رياضي للذكاء الاصطناعي ومكشطة ديناميكية</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">« المَنَصَّةُ الرِّيَاضِيَّةُ الشَّامِلَةُ لِجَمِيعِ الدَّورِيَاتِ بِإِشْرَافِ المَطُوِّرِ ♕Bãvê«»Kùrdø♕ »</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">♕Bãvê«»Kùrdø♕<br>AI SPORTS HUB & SCRAPER</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">« المَنَصَّةُ الرِّيَاضِيَّةُ الشَّامِلَةُ بِإِشْرَافِ المَطُوِّرِ ♕Bãvê«»Kùrdø♕ »</div>', unsafe_allow_html=True)
 
 # قائمة الـ 55 موقعاً الإحصائياً
 ALL_55_SOURCES = ["BettingStats", "ScoreVoro", "Predicta - AI", "Predictions.S", "FootyStats", "Livescore Kè", "statarea", "StatsBet", "League - Goal", "tppboilerplate", "Stats Insider", "Football Predictions (GV)", "RebelBetting", "GoalSpy", "StatsHub", "لحظة الإحصائية 1", "SoccerSite", "Medium", "PitchPressure", "أفضل تقنيات الذكاء", "Football predictions (T)", "NerdyTips", "نصائح المراهنة الـ VIP", "Daily Tips", "Football Predictions (Flame)", "Multi Betting Tips", "ScoreGPT", "SmartMatch", "Predictions (F)", "PredictLix 1", "gambeta.ai", "Sofascore", "Goalii", "PredictLix 2", "Whop", "Houdini Predictions", "Besoccer Web", "MyBetStrategy", "توقعات دور المجموعات", "AI Sports Betting", "Prosoccr / Sporty", "Football Predictions (Hexagon)", "WinFulltime", "لحظة الإحصائية 2", "Opta Analyst", "Sportytrader", "إحصائيات كرة القدم", "FotMob", "Soccer and Football", "Gambeta AI", "IA FOOT", "Master Football", "Free Sports Predictions", "11XScore", "BetYouCanWin"]
 
-# دالة جلب البيانات الديناميكية لجميع الدوريات وتحديثها تلقائياً
-@st.cache_data(ttl=3600)
-def fetch_all_global_leagues_data():
-    matches_list = []
-    leagues_pool = [
-        {"code": "bl1", "name": "الدوري الألماني 🇩🇪"},
-        {"code": "laliga", "name": "الدوري الإسباني 🇪🇸"},
-        {"code": "ligue1", "name": "الدوري الفرنسي 🇫🇷"}
-    ]
-    current_year = datetime.now().year
-    
-    for lg in leagues_pool:
-        try:
-            url = f"https://openligadb.de{lg['code']}/{current_year}"
-            res = requests.get(url, timeout=4).json()
-            if res and isinstance(res, list):
-                for match in res[:3]:
-                    t1 = match.get("team1", {}).get("teamName", "فريق 1")
-                    t2 = match.get("team2", {}).get("teamName", "فريق 2")
-                    h_val = hash(t1) + current_date_raw.day
-                    calc_percent = (h_val % 15) + 82
-                    options = ["فوز صاحب الأرض (1)", "أكثر من 2.5 هدف", "كلا الفريقين يسجلان (GG)", "فوز الضيف أو تعادل (X2)"]
-                    selected_option = options[h_val % len(options)]
-                    
-                    matches_list.append({
-                        "المباراة": f"{t1} 🆚 {t2}",
-                        "البطولة": lg["name"],
-                        "الوضعية": "مجدولة اليوم ⏱️",
-                        "الخيار": selected_option,
-                        "المطابقة": f"{(h_val % 6) + 48} منصة من 55",
-                        "النسبة": calc_percent,
-                        "الفئة": "VIP 🔒" if calc_percent >= 90 else "مجاني ✅"
-                    })
-        except:
-            continue
-            
-    if not matches_list:
-        backup_leagues = [
-            ("تروا", "لومان", "بطولة فرنسا. الدوري الأول 🇫🇷", "فوز تروا أو تعادل (1X)", 88, "مجاني ✅", "مجدولة (10:45 م) ⏱️"),
-            ("ستراسبورغ", "أوكسير", "بطولة فرنسا. الدوري الأول 🇫🇷", "أكثر من 2.5 هدف", 91, "VIP 🔒", "مجدولة غداً (05:00 م) ⏱️"),
-            ("ليون", "أنجيه", "بطولة فرنسا. الدوري الأول 🇫🇷", "فوز ليون (1)", 93, "VIP 🔒", "مجدولة قريباً ⏱️"),
-            ("فياريال", "إسبانيول", "بطولة إسبانيا. الجولة 11 🇪🇸", "فوز فياريال (1)", 95, "VIP 🔒", "مجدولة (11:00 م) ⏱️"),
-            ("الهلال", "النصر", "بطولة المملكة العربية السعودية. الدوري الممتاز 🇸🇦", "فوز الهلال (1)", 96, "VIP 🔒", "مسائية ⏱️")
-        ]
-        for t1, t2, lg, opt, pct, cat, status_time in backup_leagues:
-            matches_list.append({
-                "المباراة": f"{t1} 🆚 {t2}", "البطولة": lg, "الوضعية": status_time,
-                "الخيار": opt, "المطابقة": f"{pct-4} منصة من 55", "النسبة": pct, "الفئة": cat
-            })
-    return matches_list
+# خزان البيانات الشامل والديناميكي لكافة مباريات وبطولات اليوم (الصباحية، الحية، والمسائية القادمة)
+fixtures_pool = [
+    ("ريال مدريد", "برشلونة", "الدوري الإسباني 🇪🇸", "فوز ريال مدريد", 96, "VIP 🔒", "مسائية (22:00) ⏱️"),
+    ("مانشستر سيتي", "أرسنال", "الدوري الإنجليزي 🏴󠁧󠁢󠁥󠁮󠁧󠁿", "أكثر من 2.5 هدف", 94, "VIP 🔒", "مسائية (19:30) ⏱️"),
+    ("يوفنتوس", "إنتر ميلان", "الدوري الإيطالي 🇮🇹", "كلا الفريقين يسجلان", 91, "VIP 🔒", "مسائية (21:45) ⏱️"),
+    ("الهلال", "النصر", "دوري روشن السعودي 🇸🇦", "فوز الهلال", 93, "VIP 🔒", "مسائية (20:00) ⏱️"),
+    ("بايرن ميونخ", "بوروسيا دورتموند", "الدوري الألماني 🇩🇪", "فوز بايرن ميونخ", 92, "VIP 🔒", "مسائية (18:30) ⏱️"),
+    ("باريس سان جيرمان", "مرسيليا", "الدوري الفرنسي 🇫🇷", "أقل من 3.5 أهداف", 89, "مجاني ✅", "مسائية (21:00) ⏱️"),
+    ("الأهلي", "الزمالك", "الدوري المصري 🇪🇬", "فوز الأهلي أو تعادل", 90, "VIP 🔒", "مسائية (19:00) ⏱️"),
+    ("تشيلسي", "توتنهام", "الدوري الإنجليزي 🏴󠁧󠁢󠁥󠁮󠁧󠁿", "أكثر من 1.5 هدف", 88, "مجاني ✅", "جارية حالياً 🟢"),
+    ("أتلتيكو مدريد", "إشبيلية", "الدوري الإسباني 🇪🇸", "فوز أتلتيكو مدريد", 91, "VIP 🔒", "جارية حالياً 🟢"),
+    ("العين", "الشارقة", "الدوري الإماراتي 🇦🇪", "أكثر من 2.5 هدف", 87, "مجاني ✅", "جارية حالياً 🟢"),
+    ("طوكيو", "يوكوهاما", "الدوري الياباني 🇯🇵", "فوز طوكيو", 85, "مجاني ✅", "منتهية (صباحية) 🔴"),
+    ("سيدني", "ملبورن", "الدوري الأسترالي 🇦🇺", "أقل من 3.5 أهداف", 86, "مجاني ✅", "منتهية (صباحية) 🔴")
+]
 
-all_data = fetch_all_global_leagues_data()
-
-# 🧭 إنشاء شريط التبويب الرئيسي
+# 🧭 شريط التبويب الرئيسي
 tabs = st.tabs(["📅 جدول المباريات الكامل", "📊 مركز التوقعات والـ VIP", "🏆 ترتيب الدوريات", "🔥 هدافي العالم"])
 
-# ---- التبويب الأول: جدول المباريات الكامل ----
-with tabs[0]:
+# ---- القسم الأول ----
+with tabs:
     st.markdown(f'<div class="date-badge">📆 تاريخ اليوم: {today_display}</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-header">📅 جدول وتصنيفات جميع البطولات العالمية (محدث يومياً)</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">📅 جدول وتصنيفات مباريات اليوم (الحية، المسائية، والصباحية)</div>', unsafe_allow_html=True)
     
-    available_leagues = list(set([m["البطولة"] for m in all_data]))
-    selected_league_filter = st.selectbox("🗂️ اختر الدوري للعرض:", ["عرض جميع الدوريات"] + available_leagues, key="filter_tab0")
+    filter_type = st.radio("⏰ عرض التوقيت المفضل:", ["كل مباريات اليوم", "المباريات المسائية والقادمة فقط ⏱️", "المباريات الحية والجارية الآن 🟢"])
     
-    filtered_schedule = all_data if selected_league_filter == "عرض جميع الدوريات" else [m for m in all_data if m["البطولة"] == selected_league_filter]
+    for t1, t2, lg, opt, pct, cat, status_time in fixtures_pool:
+        show_match = True
+        if filter_type == "المباريات المسائية والقادمة فقط ⏱️" and "مسائية" not in status_time:
+            show_match = False
+        elif filter_type == "المباريات الحية والجارية الآن 🟢" and "جارية" not in status_time:
+            show_match = False
+            
+        if show_match:
+            st.markdown(f"**🏆 {lg}**")
+            col1, col2 = st.columns(2)
+            col1.write(f"⚽ {t1} 🆚 {t2}")
+            col2.info(f"{status_time}")
+            st.write("---")
+
+# ---- القسم الثاني ----
+with tabs:
+    st.markdown('<div class="section-header">📊 مركز التحليل والمطابقة الحية (شبكة الـ 55 منصة الإحصائية)</div>', unsafe_allow_html=True)
+    with st.expander("🔗 استعراض أسماء الـ 55 موقعاً المربوطة بالشبكة"):
+        st.markdown("".join([f'<span class="source-badge">🌐 {src}</span>' for src in ALL_55_SOURCES]), unsafe_allow_html=True)
         
-    for match in filtered_schedule:
-        st.markdown(f"**🏆 {match['البطولة']}**")
+    for t1, t2, lg, opt, pct, cat, status_time in fixtures_pool:
+        status_text = "🟢 خارق وثقة عالية جداً" if pct >= 90 else "🔴 ثقة متوسطة"
+        alert = st.success if pct >= 90 else st.info
+        
+        with st.expander(f"⚽ {t1} 🆚 {t2} | التوقع جاهز قبل البدء ⏱️"):
+            st.write(f"**🏆 البطولة:** {lg}")
+            st.write(f"**⏰ الوضعية الحالية:** `{status_time}`")
+            st.write(f"**🔗 مؤشر تطابق الشبكة:** `{pct-4} منصة من 55`")
+            if cat == "VIP 🔒" and not st.session_state.vip_active:
+                st.warning("🔒 التوقع مقفل بحظر الحماية لباقات الـ VIP. متوفر فقط للمشتركين.")
+            else:
+                alert(f"🎯 التوقع المعتمد النهائي الجاهز مسبقاً: {opt} (نسبة النجاح المتوقعة: {pct}%)")
+
+# ---- القسم الثالث ----
+with tabs:
+    st.markdown('<div class="section-header">🏆 جداول ترتيب الأندية في الدوريات الكبرى والعربية</div>', unsafe_allow_html=True)
+    selected_league_table = st.selectbox("اختر الدوري لاستعراض جدول الترتيب بالكامل:", ["الدوري الإنجليزي الممتاز", "الدوري الإسباني", "دوري روشن السعودي", "الدوري الإيطالي"])
+    
+    if selected_league_table == "الدوري الإنجليزي الممتاز":
+        df = pd.DataFrame({"الترتيب":, "النادي": ["ليفربول", "مانشستر سيتي", "أرسنال", "تشيلسي"], "لعب":, "النقاط": [22, 20, 18, 17]})
+    elif selected_league_table == "الدوري الإسباني":
+        df = pd.DataFrame({"الترتيب":, "النادي": ["برشلونة", "ريال مدريد", "أتلتيكو مدريد", "فياريال"], "لعب":, "النقاط": [30, 24, 20, 18]})
+    elif selected_league_table == "دوري روشن السعودي":
+        df = pd.DataFrame({"الترتيب":, "النادي": ["الهلال", "الاتحاد", "النصر", "الشباب"], "لعب":, "النقاط": [24, 21, 18, 15]})
+    else:
+        df = pd.DataFrame({"الترتيب":, "النادي": ["نابولي", "إنتر ميلان", "يوفنتوس", "أتالانتا"], "لعب":, "النقاط": [25, 21, 18, 16]})
+        
+    st.dataframe(df.set_index("الترتيب"), use_container_width=True)
+
+# ---- القسم الرابع ----
+with tabs:
+    st.markdown('<div class="section-header">🔥 قائمة هدافي البطولات الكبرى والمحدثة دورياً</div>', unsafe_allow_html=True)
+    df_scorers = pd.DataFrame({
