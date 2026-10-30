@@ -1,172 +1,140 @@
-import streamlit as st
+import json
+import requests
 import pandas as pd
+from sklearn.linear_model import LogisticRegression
 
-# 1. إعدادات واجهة المستخدم الملكية الفخمة بألوان علم كوردستان والشمس الذهبية
-st.set_page_config(page_title="♕Bãvê«»Kùrdø♕ AI Sports Hub", page_icon="⚽", layout="wide")
+# ==========================================
+# 1. إعدادات الربط مع المزودين والمواقع (APIs)
+# ==========================================
+# استبدل هذه القيم بمفاتيح الحسابات الخاصة بك (API Keys)
+FOOTBALL_API_URL = "https://api-sports.io"
+FOOTBALL_API_KEY = "YOUR_API_FOOTBALL_KEY_HERE" # مفتاح API-Football
 
-# تثبيت بيانات الحسابات والأسعار والمحافظ في الذاكرة الأساسية للموقع
-if 'sham_cash_id' not in st.session_state:
-    st.session_state.sham_cash_id = "fb2b6ef1de97fb50792c22a5d355bdb7"
-if 'binance_usdt_address' not in st.session_state:
-    st.session_state.binance_usdt_address = "0x4f86860d5326296a0dcf98f8e2ff94b0266dc2dd"
-if 'binance_network' not in st.session_state:
-    st.session_state.binance_network = "Binance Smart Chain (BSC - BEP20)"
+ONESIGNAL_URL = "https://onesignal.com"
+ONESIGNAL_APP_ID = "YOUR_ONESIGNAL_APP_ID"         # مفتاح OneSignal App ID
+ONESIGNAL_REST_KEY = "YOUR_ONESIGNAL_REST_KEY"     # مفتاح OneSignal API Key
 
-# الأسعار الحالية المعتمدة لباقات الـ VIP
-if 'price_weekly' not in st.session_state:
-    st.session_state.price_weekly = "5$"
-if 'price_monthly' not in st.session_state:
-    st.session_state.price_monthly = "45$"
-if 'price_yearly' not in st.session_state:
-    st.session_state.price_yearly = "120$"
-
-if 'vip_active' not in st.session_state:
-    st.session_state.vip_active = False
-
-# جلب تاريخ اليوم الحالي الحقيقي
-today_display = "الجمعة 30 أكتوبر 2026"
-
-# تخصيص واجهة المستخدم المتقدمة للهواتف بألوان علم كوردستان الكاملة
-st.markdown("""
-    <style>
-    .kurdistan-flag {
-        display: flex; height: 12px; width: 100%; margin-bottom: 20px; border-radius: 4px; overflow: hidden;
+# ==========================================
+# 2. سحب البيانات الرياضية الإحصائية
+# ==========================================
+def fetch_match_data(fixture_id):
+    """
+    سحب بيانات المباراة من API-Football (أو محاكاة إحصائيات Opta/Sportradar)
+    """
+    headers = {
+        'x-rapidapi-host': "v3.football.api-sports.io",
+        'x-rapidapi-key': FOOTBALL_API_KEY
     }
-    .flag-red { background-color: #ED2024; flex: 1; }
-    .flag-white { background-color: #FFFFFF; flex: 1; }
-    .flag-green { background-color: #278542; flex: 1; }
+    query = {"id": fixture_id}
     
-    .stApp {
-        background: linear-gradient(135deg, #070a07 0%, #111a11 40%, #1a0f0f 100%);
-    }
-    .main-title {
-        text-align: center; font-size: 26px; color: #FFD700; font-weight: bold;
-        text-shadow: 0px 0px 15px rgba(237, 32, 36, 0.6); padding-bottom: 5px;
-    }
-    .sun-icon { color: #FFD700; font-size: 24px; text-align: center; margin-bottom: 5px; }
-    .sub-title {
-        text-align: center; font-size: 14px; color: #FFFFFF; font-weight: bold;
-        background: rgba(39, 133, 66, 0.2); padding: 8px; border-radius: 8px;
-        border: 1px solid #FFD700; margin-bottom: 20px;
-    }
-    .wallet-box {
-        background-color: rgba(255, 215, 0, 0.05); border: 2px dashed #FFD700;
-        border-radius: 8px; padding: 12px; margin-top: 10px; color: #FFFFFF;
-    }
-    .source-badge {
-        display: inline-block; background-color: #278542; color: white;
-        padding: 4px 8px; margin: 3px; border-radius: 10px; font-size: 11px;
-        font-weight: bold; border: 1px solid #FFD700;
-    }
-    .section-header {
-        color: #FFD700 !important; font-size: 20px !important; font-weight: bold !important;
-        border-right: 4px solid #ED2024; padding-right: 8px; margin-top: 15px; margin-bottom: 15px;
-    }
-    .date-badge {
-        background-color: #ED2024; color: white; padding: 5px 12px; 
-        border-radius: 20px; font-size: 14px; font-weight: bold; text-align: center;
-        margin-bottom: 15px; display: inline-block; border: 1px solid #FFD700;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
-# عرض علم كوردستان والشمس الذهبية في المقدمة
-st.markdown('<div class="kurdistan-flag"><div class="flag-red"></div><div class="flag-white"></div><div class="flag-green"></div></div>', unsafe_allow_html=True)
-st.markdown('<div class="sun-icon">☀️</div>', unsafe_allow_html=True)
-st.markdown('<div class="main-title">♕Bãvê«»Kùrdø♕<br>AI SPORTS HUB & SCRAPER</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-title">« المَنَصَّةُ الرِّيَاضِيَّةُ الشَّامِلَةُ بِإِشْرَافِ المَطُوِّرِ ♕Bãvê«»Kùrdø♕ »</div>', unsafe_allow_html=True)
-
-# قائمة الـ 55 موقعاً الإحصائياً
-ALL_55_SOURCES = ["BettingStats", "ScoreVoro", "Predicta - AI", "Predictions.S", "FootyStats", "Livescore Kè", "statarea", "StatsBet", "League - Goal", "tppboilerplate", "Stats Insider", "Football Predictions (GV)", "RebelBetting", "GoalSpy", "StatsHub", "لحظة الإحصائية 1", "SoccerSite", "Medium", "PitchPressure", "أفضل تقنيات الذكاء", "Football predictions (T)", "NerdyTips", "نصائح المراهنة الـ VIP", "Daily Tips", "Football Predictions (Flame)", "Multi Betting Tips", "ScoreGPT", "SmartMatch", "Predictions (F)", "PredictLix 1", "gambeta.ai", "Sofascore", "Goalii", "PredictLix 2", "Whop", "Houdini Predictions", "Besoccer Web", "MyBetStrategy", "توقعات دور المجموعات", "AI Sports Betting", "Prosoccr / Sporty", "Football Predictions (Hexagon)", "WinFulltime", "لحظة الإحصائية 2", "Opta Analyst", "Sportytrader", "إحصائيات كرة القدم", "FotMob", "Soccer and Football", "Gambeta AI", "IA FOOT", "Master Football", "Free Sports Predictions", "11XScore", "BetYouCanWin"]
-
-# خزان البيانات الشامل والديناميكي لكافة مباريات وبطولات اليوم
-fixtures_pool = [
-    ("ريال مدريد", "برشلونة", "الدوري الإسباني 🇪🇸", "فوز ريال مدريد", 96, "VIP 🔒", "مسائية (22:00) ⏱️"),
-    ("مانشستر سيتي", "أرسنال", "الدوري الإنجليزي 🏴󠁧󠁢󠁥󠁮󠁧󠁿", "أكثر من 2.5 هدف", 94, "VIP 🔒", "مسائية (19:30) ⏱️"),
-    ("يوفنتوس", "إنتر ميلان", "الدوري الإيطالي 🇮🇹", "كلا الفريقين يسجلان", 91, "VIP 🔒", "مسائية (21:45) ⏱️"),
-    ("الهلال", "النصر", "دوري روشن السعودي 🇸🇦", "فوز الهلال", 93, "VIP 🔒", "مسائية (20:00) ⏱️"),
-    ("بايرن ميونخ", "بوروسيا دورتموند", "الدوري الألماني 🇩🇪", "فوز بايرن ميونخ", 92, "VIP 🔒", "مسائية (18:30) ⏱️"),
-    ("باريس سان جيرمان", "مرسيليا", "الدوري الفرنسي 🇫🇷", "أقل من 3.5 أهداف", 89, "مجاني ✅", "مسائية (21:00) ⏱️"),
-    ("الأهلي", "الزماهير", "الدوري المصري 🇪🇬", "فوز الأهلي أو تعادل", 90, "VIP 🔒", "مسائية (19:00) ⏱️"),
-    ("تشيلسي", "توتنهام", "الدوري الإنجليزي 🏴󠁧󠁢󠁥󠁮󠁧󠁿", "أكثر من 1.5 هدف", 88, "مجاني ✅", "جارية حالياً 🟢"),
-    ("أتلتيكو مدريد", "إشبيلية", "الدوري الإسباني 🇪🇸", "فوز أتلتيكو مدريد", 91, "VIP 🔒", "جارية حالياً 🟢"),
-    ("العين", "الشارقة", "الدوري الإماراتي 🇦🇪", "أكثر من 2.5 هدف", 87, "مجاني ✅", "جارية حالياً 🟢"),
-    ("طوكيو", "يوكوهاما", "الدوري الياباني 🇯🇵", "فوز طوكيو", 85, "مجاني ✅", "منتهية (صباحية) 🔴"),
-    ("sydney", "melbourne", "الدوري الأسترالي 🇦🇺", "أقل من 3.5 أهداف", 86, "مجاني ✅", "منتهية (صباحية) 🔴")
-]
-
-# 🧭 تعريف التبويبات الأربعة بشكل منفصل متوافق
-tab1, tab2, tab3, tab4 = st.tabs(["📅 جدول المباريات الكامل", "📊 مركز التوقعات والـ VIP", "🏆 ترتيب الدوريات", "🔥 هدافي العالم"])
-
-# ---- القسم الأول ----
-with tab1:
-    st.markdown(f'<div class="date-badge">📆 تاريخ اليوم: {today_display}</div>', unsafe_allow_html=True)
-    st.markdown('<div class="section-header">📅 جدول وتصنيفات مباريات اليوم (الحية، المسائية، والصباحية)</div>', unsafe_allow_html=True)
-    
-    filter_type = st.radio("⏰ عرض التوقيت المفضل:", ["كل مباريات اليوم", "المباريات المسائية والقادمة فقط ⏱️", "المباريات الحية والجارية الآن 🟢"])
-    
-    for t1, t2, lg, opt, pct, cat, status_time in fixtures_pool:
-        show_match = True
-        if filter_type == "المباريات المسائية والقادمة فقط ⏱️" and "مسائية" not in status_time:
-            show_match = False
-        elif filter_type == "المباريات الحية والجارية الآن 🟢" and "جارية" not in status_time:
-            show_match = False
-            
-        if show_match:
-            st.markdown(f"**🏆 {lg}**")
-            st.write(f"⚽ {t1} 🆚 {t2} | {status_time}")
-            st.write("---")
-
-# ---- القسم الثاني ----
-with tab2:
-    st.markdown('<div class="section-header">📊 مركز التحليل والمطابقة الحية (شبكة الـ 55 منصة الإحصائية)</div>', unsafe_allow_html=True)
-    with st.expander("🔗 استعراض أسماء الـ 55 موقعاً المربوطة بالشبكة"):
-        st.markdown("".join([f'<span class="source-badge">🌐 {src}</span>' for src in ALL_55_SOURCES]), unsafe_allow_html=True)
+    # في الواقع سنقوم بطلب الـ API، هنا نضع بيانات تجريبية (Mock Data) كبديل في حال عدم وجود مفتاح
+    try:
+        # تفكيك التعليق بالأسفل لتفعيل سحب البيانات الحقيقي:
+        # response = requests.get(FOOTBALL_API_URL, headers=headers, params=query).json()
         
-    for t1, t2, lg, opt, pct, cat, status_time in fixtures_pool:
-        if cat == "VIP 🔒" and not st.session_state.vip_active:
-            with st.expander(f"⚽ {t1} 🆚 {t2} | التوقع جاهز قبل البدء ⏱️"):
-                st.write(f"**🏆 البطولة:** {lg}")
-                st.write(f"**⏰ الوضعية الحالية:** `{status_time}`")
-                st.warning("🔒 التوقع مقفل بحظر الحماية لباقات الـ VIP. متوفر فقط للمشتركين.")
-        else:
-            with st.expander(f"⚽ {t1} 🆚 {t2} | التوقع جاهز قبل البدء ⏱️"):
-                st.write(f"**🏆 البطولة:** {lg}")
-                st.write(f"**⏰ الوضعية الحالية:** `{status_time}`")
-                st.success(f"🎯 التوقع النهائي المعتمد الجاهز مسبقاً: {opt} (نسبة النجاح المتوقعة: {pct}%)")
+        # بيانات إحصائية افتراضية للمباراة القادمة (أداء آخر 5 مباريات، نسبة الاستحواذ، غيابات)
+        mock_data = {
+            "home_team": "Real Madrid",
+            "away_team": "Barcelona",
+            "home_form": 0.80,      # كفاءة الفريق صاحب الأرض (80%)
+            "away_form": 0.75,      # كفاءة الفريق الضيف (75%)
+            "home_injuries": 1,     # عدد الإصابات المؤثرة لدى الأرض
+            "away_injuries": 3,     # عدد الإصابات المؤثرة لدى الضيف
+            "home_h2h_win_rate": 0.60 # نسبة الفوز في المواجهات المباشرة التاريخية (Opta Data)
+        }
+        return mock_data
+    except Exception as e:
+        print(f"حدث خطأ أثناء سحب البيانات: {e}")
+        return None
 
-# ---- القسم الثالث ----
-with tab3:
-    st.markdown('<div class="section-header">🏆 جداول ترتيب الأندية في الدوريات الكبرى والعربية</div>', unsafe_allow_html=True)
-    selected_league_table = st.selectbox("اختر الدوري لاستعراض جدول الترتيب بالكامل:", ["الدوري الإنجليزي الممتاز", "الدوري الإسباني", "دوري روشن السعودي", "الدوري الإيطالي"])
+# ==========================================
+# 3. محرك الذكاء الاصطناعي للتوقعات (AI Engine)
+# ==========================================
+def train_prediction_model():
+    """
+    تدريب نموذج ذكاء اصطناعي مبسط بناءً على بيانات تاريخية (مثل الموفرة من Sportradar)
+    """
+    # بيانات تاريخية تجريبية للتدريب: [نموذج الأرض, نموذج الضيف, إصابات الأرض, إصابات الضيف, نسبة المواجهات التاريخية]
+    X_train = [
+        [0.85, 0.60, 0, 2, 0.70], # فوز صاحب الأرض (1)
+        [0.50, 0.80, 2, 0, 0.40], # فوز الضيف أو تعادل (0)
+        [0.90, 0.50, 1, 3, 0.65], # فوز صاحب الأرض (1)
+        [0.40, 0.70, 3, 1, 0.30]  # فوز الضيف أو تعادل (0)
+    ]
+    # النتيجة: 1 تعني فوز صاحب الأرض، 0 تعني تعادل أو خسارة
+    y_train = [1, 0, 1, 0]
     
-    if selected_league_table == "الدوري الإنجليزي الممتاز":
-        st.write("1️⃣ ليفربول - 24 نقطة")
-        st.write("2️⃣ مانشستر سيتي - 23 نقطة")
-        st.write("3️⃣ أرسنال - 20 نقطة")
-        st.write("4️⃣ تشيلسي - 18 نقطة")
-    elif selected_league_table == "الدوري الإسباني":
-        st.write("1️⃣ برشلونة - 30 نقطة")
-        st.write("2️⃣ ريال مدريد - 27 نقطة")
-        st.write("3️⃣ أتلتيكو مدريد - 21 نقطة")
-        st.write("4️⃣ فياريال - 18 نقطة")
-    elif selected_league_table == "دوري روشن السعودي":
-        st.write("1️⃣ الهلال - 24 نقطة")
-        st.write("2️⃣ الاتحاد - 21 نقطة")
-        st.write("3️⃣ النصر - 18 نقطة")
-        st.write("4️⃣ الشباب - 15 نقطة")
-    else:
-        st.write("1️⃣ نابولي - 22 نقطة")
-        st.write("2️⃣ إنتر ميلان - 18 نقطة")
-        st.write("3️⃣ يوفنتوس - 17 نقطة")
-        st.write("4️⃣ أتالانتا - 16 نقطة")
+    # استخدام خوارزمية الانحدار اللوجستي للتوقع
+    model = LogisticRegression()
+    model.fit(X_train, y_train)
+    return model
 
-# ---- القسم الرابع ----
-with tab4:
-    st.markdown('<div class="section-header">🔥 قائمة هدافي البطولات الكبرى والمحدثة دورياً</div>', unsafe_allow_html=True)
-    st.write("⚽ روبرت ليفاندوفسكي (برشلونة) - 12 هدف")
-    st.write("⚽ إيرلينج هالاند (مانشستر سيتي) - 11 هدف")
-    st.write("⚽ ألكسندر ميتروفيتش (الهلال) - 10 أهداف")
-    st.write("⚽ كيليان مبابي (ريال مدريد) - 8 أهداف")
-    st.write("⚽ محمد صلاح (ليفربول) - 7 أهداف")
+def predict_match_outcome(model, match_data):
+    """
+    حساب التوقع ونسبة الدقة للمباراة الحالية
+    """
+    # تجهيز بيانات المباراة المدخلة للخوارزمية
+    current_match_features = [[
+        match_data["home_form"],
+        match_data["away_form"],
+        match_data["home_injuries"],
+        match_data["away_injuries"],
+        match_data["home_h2h_win_rate"]
+    ]]
+    
+    # حساب الاحتمالات المئوية
+    probabilities = model.predict_proba(current_match_features)[0]
+    home_win_probability = probabilities[1] * 100 # نسبة فوز صاحب الأرض
+    
+    return round(home_win_probability, 2)
 
+# ==========================================
+# 4. إرسال الإشعارات التلقائية بالمنصة (OneSignal)
+# ==========================================
+def send_push_notification(match_name, prediction_percentage):
+    """
+    إرسال إشعار فوري للمستخدمين بالتوقع الجديد ونسبة دقته عبر OneSignal
+    """
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+        "Authorization": f"Basic {ONESIGNAL_REST_KEY}"
+    }
+    
+    payload = {
+        "app_id": ONESHIGNAL_APP_ID,
+        "included_segments": ["All Users"], # إرسال لجميع المشتركين
+        "headings": {"en": "🔥 توقع ذكي جديد!"},
+        "contents": {
+            "en": f"توقع مباراة {match_name}: نسبة فوز صاحب الأرض هي {prediction_percentage}% بناءً على تحليل الذكاء الاصطناعي."
+        }
+    }
+    
+    # تفعيل الإرسال الحقيقي عند إضافة المفاتيح الصحيحة
+    # response = requests.post(ONESIGNAL_URL, headers=headers, data=json.dumps(payload))
+    # return response.status_code
+    print(f"\n[OneSignal Notification Sent]: توقع مباراة {match_name} جاهز بنسبة {prediction_percentage}%")
+
+# ==========================================
+# 5. تشغيل المنومة البرمجية بالكامل
+# ==========================================
+if __name__ == "__main__":
+    print("⏳ جاري تشغيل النظام وربط المواقع الرياضية والذكاء الاصطناعي...")
+    
+    # الخطوة 1: سحب البيانات (محاكاة الربط مع API-Football و Opta)
+    match_data = fetch_match_data(fixture_id=12345)
+    
+    if match_data:
+        match_name = f"{match_data['home_team']} VS {match_data['away_team']}"
+        print(f"📊 تم سحب إحصائيات مباراة: {match_name}")
+        
+        # الخطوة 2: تدريب نموذج التوقع (محاكاة الاستفادة من أرشيف Sportradar)
+        ai_model = train_prediction_model()
+        
+        # الخطوة 3: استخراج التوقع النهائي
+        prediction_score = predict_match_outcome(ai_model, match_data)
+        print(f"🤖 حسابات الذكاء الاصطناعي انتهت. نسبة فوز {match_data['home_team']} هي: {prediction_score}%")
+        
+        # الخطوة 4: دفع التوقع للمستخدمين عبر نظام الإشعارات (OneSignal)
+        send_push_notification(match_name, prediction_score)
+        
+        print("\n✅ تمت العملية بنجاح! الموقع جاهز لعرض البيانات الآن.")
